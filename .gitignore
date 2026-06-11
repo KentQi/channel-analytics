@@ -1,0 +1,78 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env & secrets
+.env
+.env.local
+.env.*.local
+.session_secret
+config/.key
+cookies.txt
+
+# Local data (NEVER commit user data — see PLAN.md §6 P0)
+# data/fixtures/ is COMMITTED (mock data for devs); only runtime dirs excluded
+data/demo.db
+data/rpa_downloads/
+uploads/
+etl_data/
+logs/
+*.log
+*.db
+*.sqlite
+*.sqlite3
+*.db.backup_*
+*.sql
+
+# Backups & customer dumps (P0: 75MB SQL dump risk)
+backup/
+backups/
+
+# Runtime caches
+.rpa_downloads/
+.playwright-mcp/
+.superpowers/
+.claude/
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# Reports (generated, may contain W1 findings with sensitive data)
+reports/
+!docs/security/
+
+# Local keyword configs (P0: do NOT commit real branding keywords)
+scripts/branding_keywords.local.yaml
+scripts/.gitleaks.local.toml
+
+# Test artifacts (root-level debug scripts only — tests/ directory is committed)
+/test_*.py
+/debug_*.py
+
+# Deployment local scripts
+*.bat
+deploy/local/
+
+# Defense-in-depth: explicit block of any keyword leak path,
+# even though it should never enter the repo in the first place.
+scripts/*.local.yaml
+scripts/.local/
+.gitleaks.local.toml

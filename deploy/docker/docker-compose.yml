@@ -1,0 +1,66 @@
+# channel-analytics docker-compose(开发/自部署)
+#
+# 用法:
+#   cp .env.example .env  && 编辑 .env
+#   docker compose up -d
+#
+# 数据库可选:
+#   - SQLite(默认,无需 MySQL/Postgres 容器,数据在 ./data/dev.db)
+#   - MySQL  → 改 DATABASE_URL=mysql+pymysql://... + 启用 mysql 服务
+#   - Postgres → 改 DATABASE_URL=postgresql+psycopg://... + 启用 postgres 服务
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/docker/Dockerfile
+    container_name: channel-analytics-api
+    env_file:
+      - ../.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../data:/app/data
+      - ../logs:/app/logs
+      - ../rpa_downloads:/app/data/rpa_downloads
+    depends_on:
+      db:
+        condition: service_healthy
+        required: false
+    restart: unless-stopped
+
+  # 可选:MySQL 服务(SQLite 默认不开)
+  # db:
+  #   image: mysql:8.0
+  #   container_name: channel-analytics-mysql
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-changeme}
+  #     MYSQL_DATABASE: ${MYSQL_DATABASE:-channel_analytics}
+  #     MYSQL_USER: ${MYSQL_USER:-channel}
+  #     MYSQL_PASSWORD: ${MYSQL_PASSWORD:-changeme}
+  #   ports:
+  #     - "3306:3306"
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+  #   healthcheck:
+  #     test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  # 可选:Postgres 服务
+  # postgres:
+  #   image: postgres:15
+  #   container_name: channel-analytics-postgres
+  #   environment:
+  #     POSTGRES_USER: ${POSTGRES_USER:-channel}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+  #     POSTGRES_DB: ${POSTGRES_DB:-channel_analytics}
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+
+# volumes:
+#   mysql_data:
+#   postgres_data:

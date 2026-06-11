@@ -1,0 +1,5 @@
+﻿role,modules,sales_tabs,regions,created_at,updated_at
+admin,"sales,stock,repurchase,etl,permissions,reports,alerts,rpa,custom_report,advanced,logs,todo,sys_config,data_management,basis","dashboard,detail,indicator,flow_analysis,wide_table",,2024-01-01 00:00:00,2024-01-01 00:00:00
+manager,"sales,stock,repurchase,reports","dashboard,detail,indicator","East,South",2024-01-01 00:00:00,2024-01-01 00:00:00
+analyst,"sales,stock,reports","dashboard,detail","East,South",2024-01-01 00:00:00,2024-01-01 00:00:00
+viewer,"sales,reports",dashboard,East,2024-01-01 00:00:00,2024-01-01 00:00:00

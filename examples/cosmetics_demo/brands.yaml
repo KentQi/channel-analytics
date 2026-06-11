@@ -1,0 +1,41 @@
+# 化妆品示例品牌清单(开源占位 — 严禁写真实品牌名)
+#
+# 这是 cosmetics_demo 的种子数据;真实部署应替换为自己的品牌。
+#
+# 字段含义:
+#   name: 品牌名(显示用)
+#   code: 内部代号(代码用)
+#   active: 是否当前启用
+#
+# 重要安全约束:
+#   - 严禁写原仓真实品牌名(对应 PLAN.md §6 P0)
+#   - 写完后用 scripts/check_branding.py 扫描确认 0 命中
+
+brands:
+  - name: "Brand A"
+    code: "BRAND_A"
+    active: true
+  - name: "Brand B"
+    code: "BRAND_B"
+    active: true
+  - name: "Brand C"
+    code: "BRAND_C"
+    active: true
+  - name: "Brand D"
+    code: "BRAND_D"
+    active: false
+
+# 物料示例(脱敏,所有物料用通用代号)
+materials:
+  - code: "MAT-001"
+    name: "示例物料 001"
+    brand_code: "BRAND_A"
+    category: "示例品类"
+  - code: "MAT-002"
+    name: "示例物料 002"
+    brand_code: "BRAND_B"
+    category: "示例品类"
+  - code: "MAT-003"
+    name: "示例物料 003"
+    brand_code: "BRAND_A"
+    category: "示例品类"

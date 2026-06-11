@@ -1,0 +1,24 @@
+# channel-analytics 业务规则阈值(对应原仓 ETLConfig)
+#
+# 部署期可调阈值(改动无需改代码),缺失字段用代码内 defaults() 兜底。
+#
+# 字段含义参见 channel_analytics/etl/rules.py。
+
+# 批次号清洗:原值匹配列表内任一 → 视为"无效"
+batch_clean_rules: []
+#   - ""   空串
+#   - " "  空格
+#   - "NA"
+#   - "/"  "\\"  "无"  "虚拟退货"
+
+# 效期清洗(同上)
+expiry_clean_rules: []
+
+# 周转 / 趋势分析周期(天)
+turnover_cycle_days: 90
+trend_cycle_days: 30
+
+# 销售趋势判断
+trend:
+  ratio_threshold: 3.0   # 期末/期初 >= 3 视为"突增"
+  min_change: 1.0        # 绝对变化 < 1 时不报警

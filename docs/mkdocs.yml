@@ -1,0 +1,49 @@
+site_name: channel-analytics
+site_description: 通用渠道分析平台(ETL + 报表 + RPA 框架)
+site_url: https://github.com/your-org/channel-analytics
+repo_url: https://github.com/your-org/channel-analytics
+repo_name: your-org/channel-analytics
+license: Apache-2.0
+
+theme:
+  name: material
+  palette:
+    primary: indigo
+    accent: indigo
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - search.suggest
+    - content.code.copy
+    - content.code.annotate
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true
+
+nav:
+  - 首页: index.md
+  - 快速开始:
+      - 安装: getting-started/install.md
+      - 首次运行: getting-started/first-run.md
+      - Docker 部署: getting-started/docker.md
+  - 架构:
+      - 总览: architecture/overview.md
+      - ETL Pipeline: architecture/etl-pipeline.md
+      - 权限模型: architecture/permissions.md
+      - 插件系统: architecture/plugin-system.md
+  - 使用教程:
+      - 写 ERP adapter: how-to/write-erp-adapter.md
+      - 添加品牌白名单: how-to/add-brand-whitelist.md
+      - 自定义业务规则: how-to/customize-thresholds.md
+      - 添加自定义报表: how-to/add-custom-report.md
+  - API 参考:
+      - REST API: reference/api.md
+      - 配置项: reference/config.md
+      - CLI 命令: reference/cli.md
+  - 决策记录: decisions/

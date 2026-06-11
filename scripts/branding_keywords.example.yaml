@@ -1,0 +1,50 @@
+# check_branding.py 关键词配置(模板)
+#
+# ⚠️ 本文件仅作结构示例,实际词条不能进开源仓。
+#    按 PLAN.md §6 P0 的要求,真实词条维护在:
+#      - 私有构建脚本配置仓(<your-org>/build-private)
+#      - 或本机的 ~/.config/channel-analytics/branding_keywords.yaml
+#    CI 跑 check_branding.py 时,通过 --keywords 指向真实配置文件。
+#
+# 维护方式:
+#   1. 复制本文件为 branding_keywords.local.yaml(已 gitignore)
+#   2. 在 local 文件中填入真实词条
+#   3. local 文件路径通过环境变量或 CI secret 注入
+#
+# 占位字段(请在 local 文件中替换为真实词条):
+#   known_brands:        内部自营品牌名清单(原仓 → 开源仓必须清零)
+#   internal_accounts:   内部员工 / 客户账号
+#   customer_codes:      客户名 / 项目代号
+#   strict_mode:         是否启用 ERP 厂商严格模式(默认 false)
+#   erp_vendors_strict:  严格模式下的常见 ERP 厂商字符串
+
+known_brands: []        # 替换: ["brand_a", "brand_b", ...]
+internal_accounts: []   # 替换: ["account_1", ...]
+customer_codes: []      # 替换: ["project_codename", ...]
+strict_mode: false
+erp_vendors_strict: []  # 替换: ["vendor_a", "vendor_b", ...]
+
+# 忽略路径(Git LFS / 截图 / 调试快照)
+ignore_paths:
+  - ".git/"
+  - "node_modules/"
+  - "__pycache__/"
+  - "*.lock"
+  - "*.min.js"
+  - "*.png"
+  - "*.jpg"
+  - "*.xlsx"
+  - "*.pdf"
+  - "venv/"
+  - ".venv/"
+  - "dist/"
+  - "build/"
+  - ".playwright-mcp/"
+  - ".claude/"
+  - ".superpowers/"
+
+# 报告输出格式
+report:
+  format: "text"        # text | json
+  show_excerpt: true
+  group_by: "type"      # type | file

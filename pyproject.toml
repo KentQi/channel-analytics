@@ -1,0 +1,96 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "channel-analytics"
+version = "0.1.0.dev0"
+description = "通用渠道分析平台(ETL + 报表 + RPA 框架),品牌/客户名脱敏开源版"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.11"
+authors = [
+  { name = "channel-analytics maintainers" },
+]
+keywords = ["etl", "analytics", "rpa", "playwright", "open-source"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Office/Business :: Financial",
+  "Topic :: Database",
+]
+dependencies = [
+  "pydantic>=2.5",
+  "pydantic-settings>=2.1",
+  "sqlalchemy>=2.0",
+  "pandas>=2.0",
+  "openpyxl>=3.1",
+  "pyyaml>=6.0",
+  "apscheduler>=3.10",
+  "fastapi>=0.104",
+  "uvicorn[standard]>=0.24",
+  "playwright>=1.40",
+  "python-dateutil>=2.8",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.4",
+  "pytest-cov>=4.1",
+  "pytest-asyncio>=0.23",
+  "factory-boy>=3.3",
+  "httpx>=0.25",
+  "ruff>=0.1",
+  "mypy>=1.7",
+  "types-PyYAML",
+]
+mysql = [
+  "pymysql>=1.1",
+  "cryptography>=41",
+]
+postgres = [
+  "psycopg[binary]>=3.1",
+]
+
+[project.scripts]
+channel-analytics = "channel_analytics.cli:main"
+
+[project.entry-points."channel_analytics.rpa_adapters"]
+# 用户 adapter 通过这条注册:
+#   <vendor_name> = <your_package>.<your_module>:<YourAdapterClass>
+# 本仓只放一个 minimal example(见 channel_analytics/rpa/adapters/example_minimal.py)
+
+[project.entry-points."channel_analytics.brand_providers"]
+# 用户自营品牌 provider 通过这条注册:
+#   <vendor_name> = <your_package>.<your_module>:<YourProviderClass>
+# 本仓只放一个 minimal example(见 channel_analytics/etl/providers/example_minimal.py)
+
+[tool.setuptools.packages.find]
+include = ["channel_analytics*"]
+exclude = ["tests*", "docs*", "examples*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM", "RUF"]
+ignore = ["E501"]  # line-length handled by formatter
+
+[tool.mypy]
+strict = true
+python_version = "3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["channel_analytics"]
+omit = ["*/tests/*", "*/adapters/example_minimal.py"]

@@ -1,0 +1,209 @@
+# gitleaks configuration for channel-analytics
+# https://github.com/gitleaks/gitleaks
+#
+# 设计目标(对应 PLAN.md §6 P0):
+#   - 阻断: 任何形式的明文 JWT/SESSION/DB 凭据
+#   - 阻断: ERP 厂商登录凭证
+#   - 阻断: MySQL/Redis 连接串
+#   - 阻断: 高熵 base64 字符串(可能是私钥)
+#
+# 使用:
+#   gitleaks detect --config .gitleaks.toml --no-git --source ./
+#   或在 CI 中: gitleaks protect --staged --config .gitleaks.toml
+#
+# 维护:
+#   - 本配置跟随开源仓(规则是"通用"的,不含具体厂商串)
+#   - 真实账号/凭据在 .gitleaks.local.toml 扩展(同 .gitignore)
+
+title = "channel-analytics gitleaks config"
+
+# ---------------------------------------------------------------------------
+# 全局白名单(允许出现在这些路径/位置)
+# ---------------------------------------------------------------------------
+[allowlist]
+  description = "Global allowlist"
+  paths = [
+    '''^\.env$''',
+    '''^\.env\.local$''',
+    '''^\.env\..+\.local$''',
+    '''\.env\.example$''',
+    '''\.gitleaks\.toml$''',
+    '''\.gitleaks\.local\.toml$''',
+    '''node_modules/''',
+    '''__pycache__/''',
+    '''\.venv/''',
+    '''venv/''',
+    '''dist/''',
+    '''build/''',
+    '''.*\.lock$''',
+    '''.*\.min\.js$''',
+    '''.*\.map$''',
+    # 测试代码 / 字段定义中的占位符与示例
+    '''^tests/''',
+    '''test_.*\.py$''',
+    '''/tests/.*\.py$''',
+    # W1 净化报告 — 内含原仓凭据字符串,新仓不开源
+    '''^reports/''',
+    # README/CI/迁移文档里的占位符与示例连接串
+    '''README\.md$''',
+    '''/README\.md$''',
+    '''\.github/workflows/.*\.yml$''',
+    '''alembic/.*\.md$''',
+    '''docs/.*\.md$''',
+    '''deploy/.*''',
+    '''examples/.*''',
+    '''web/.*\.md$''',
+    '''web/.*\.html$''',
+  ]
+
+  # 跳过"明显是占位符"的 secret(连字符 = /: 后的值)
+  stopwords = [
+    "your-session-secret",
+    "your-database-password",
+    "your_password",
+    "your-password",
+    "YOUR_SECRET_HERE",
+    "your-secret",
+    "REPLACE_ME",
+    "CHANGE_ME",
+    # CI 测试占位(对齐 conftest.py 的 _bootstrap_test_env)
+    "ci-test-secret",
+    "ci-jwt-secret",
+    "test-session-secret",
+    "test-jwt-secret",
+  ]
+
+# ---------------------------------------------------------------------------
+# 1. JWT / Session 密钥(本项目特定)
+# ---------------------------------------------------------------------------
+[[rules]]
+  id = "project-jwt-secret"
+  description = "本项目的 JWT_SECRET / SESSION_SECRET"
+  regex = '''(?i)(JWT_SECRET|SESSION_SECRET|APP_SECRET|AUTH_SECRET)\s*[=:]\s*['"]?([A-Za-z0-9+/=_\-]{16,})['"]?'''
+  keywords = ["jwt_secret", "session_secret", "app_secret", "auth_secret"]
+  tags = ["secret", "auth", "project-internal"]
+
+  [rules.allowlist]
+    description = "Skip obvious placeholders / code field defs"
+    regexTarget = "line"
+    regexes = [
+      '''(?i)(your|sample|example|test|demo|placeholder|changeme|replace)[-_]?(secret|password|key|token)?''',
+      '''YOUR_[A-Z_]+_HERE''',
+      ''': \s*SecretStr(\s*\|\s*None)?\s*=\s*(None|Field\(|$)''',
+      '''os\.environ\.setdefault''',
+    ]
+
+# ---------------------------------------------------------------------------
+# 2. 数据库密码
+# ---------------------------------------------------------------------------
+[[rules]]
+  id = "project-db-password"
+  description = "本项目的 DB_PASSWORD / DATABASE_URL"
+  regex = '''(?i)(DB_PASSWORD|DATABASE_URL|POSTGRES_PASSWORD|REDIS_PASSWORD|MYSQL_ROOT_PASSWORD)\s*[=:]\s*['"]?([^\s'"]+)['"]?'''
+  keywords = ["db_password", "database_url", "mysql_root_password"]
+  tags = ["secret", "database"]
+
+  [rules.allowlist]
+    description = "Skip obvious placeholders / shell variables / code field defs"
+    regexTarget = "line"
+    regexes = [
+      '''(?i)(your|sample|example|test|demo|placeholder|changeme|replace)[-_]?(secret|password|key|token)?''',
+      '''YOUR_[A-Z_]+_HERE''',
+      '''^\s*echo\s+''',         # shell echo 帮助行
+      '''DB_PASS="\$\{DB_PASSWORD:-''',  # shell 变量 fallback
+      ''': \s*str\s*=\s*"''',     # 代码字段定义
+      '''sqlite:///:memory:''',
+      '''os\.environ\.setdefault''',
+    ]
+
+# ---------------------------------------------------------------------------
+# 3. MySQL/PostgreSQL/Redis 连接串
+# ---------------------------------------------------------------------------
+[[rules]]
+  id = "db-connection-string"
+  description = "数据库连接串"
+  regex = '''(?i)(mysql|postgresql|postgres|redis|mongodb)://[^\s'"<>]+:[^\s'"<>]+@[^\s'"<>]+'''
+  tags = ["secret", "connection-string"]
+
+# ---------------------------------------------------------------------------
+# 4. ERP 厂商登录凭证(可扩展,本仓仅放通用规则)
+# ---------------------------------------------------------------------------
+[[rules]]
+  id = "erp-credentials"
+  description = "ERP/RPA 账号密码(rpa_username / rpa_password / erp_token)"
+  regex = '''(?i)(rpa_(target_)?(username|password|token)|erp_(username|password|token|api[_-]?key))\s*[=:]\s*['"]?([^\s'"]+)['"]?'''
+  keywords = ["rpa_username", "rpa_password", "erp_token", "erp_api_key"]
+  tags = ["secret", "rpa", "vendor"]
+
+  [rules.allowlist]
+    description = "Skip obvious placeholders / code field defs"
+    regexTarget = "line"
+    regexes = [
+      '''(?i)(your|sample|example|test|demo|placeholder|changeme|replace)[-_]?(secret|password|key|token)?''',
+      '''YOUR_[A-Z_]+_HERE''',
+      ''': \s*(str|SecretStr(\s*\|\s*None)?)\s*=\s*(None|Field\(|"")''',
+      '''os\.environ\.setdefault''',
+    ]
+
+# ---------------------------------------------------------------------------
+# 5. AWS / GCP / Azure 凭据(开源项目常见漏点)
+# ---------------------------------------------------------------------------
+[[rules]]
+  id = "aws-access-token"
+  description = "AWS Access Key ID"
+  regex = '''(?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}'''
+  tags = ["secret", "aws"]
+
+[[rules]]
+  id = "aws-secret-key"
+  description = "AWS Secret Access Key"
+  regex = '''(?i)aws(.{0,20})?(secret|sk)(.{0,20})?['"][0-9a-zA-Z/+]{40}['"]'''
+  tags = ["secret", "aws"]
+
+[[rules]]
+  id = "gcp-api-key"
+  description = "GCP API Key"
+  regex = '''AIza[0-9A-Za-z\-_]{35}'''
+  tags = ["secret", "gcp"]
+
+# ---------------------------------------------------------------------------
+# 6. 通用高熵 token / private key
+# ---------------------------------------------------------------------------
+[[rules]]
+  id = "private-key"
+  description = "PEM private key header"
+  regex = '''-----BEGIN (?:RSA|DSA|EC|OPENSSH|PGP) PRIVATE KEY(?: BLOCK)?-----'''
+  tags = ["private-key"]
+
+[[rules]]
+  id = "github-pat"
+  description = "GitHub Personal Access Token"
+  regex = '''ghp_[0-9a-zA-Z]{36}'''
+  tags = ["secret", "github"]
+
+[[rules]]
+  id = "github-oauth"
+  description = "GitHub OAuth Token"
+  regex = '''gho_[0-9a-zA-Z]{36}'''
+  tags = ["secret", "github"]
+
+[[rules]]
+  id = "slack-token"
+  description = "Slack Token"
+  regex = '''xox[baprs]-[0-9a-zA-Z]{10,48}'''
+  tags = ["secret", "slack"]
+
+[[rules]]
+  id = "stripe-secret-key"
+  description = "Stripe Secret Key"
+  regex = '''sk_live_[0-9a-zA-Z]{24,34}'''
+  tags = ["secret", "stripe"]
+
+# ---------------------------------------------------------------------------
+# 7. PyPI / NPM token
+# ---------------------------------------------------------------------------
+[[rules]]
+  id = "pypi-token"
+  description = "PyPI API token"
+  regex = '''pypi-AgEIcHlwaS5vcmc[A-Za-z0-9_\-]{50,100}'''
+  tags = ["secret", "pypi"]

@@ -1,0 +1,14 @@
+{
+    "name": "my-erp-adapter",
+    "version": "0.1.0",
+    "description": "My ERP adapter for channel-analytics",
+    "dependencies": [
+        "channel-analytics>=0.1.0",
+        "playwright>=1.40"
+    ],
+    "entry_points": {
+        "channel_analytics.rpa_adapters": [
+            "my_erp = my_erp_package.adapter:MyErpAdapter"
+        ]
+    }
+}
