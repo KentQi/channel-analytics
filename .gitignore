@@ -76,3 +76,4 @@ deploy/local/
 scripts/*.local.yaml
 scripts/.local/
 .gitleaks.local.toml
+PLAN.md
