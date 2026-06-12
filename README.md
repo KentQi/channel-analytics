@@ -210,7 +210,7 @@ class MyReport(BaseReport):
 register_report(MyReport)
 ```
 
-### 添加自营品牌白名单
+### 添加品牌白名单
 
 ```yaml
 # config/brands.yaml
